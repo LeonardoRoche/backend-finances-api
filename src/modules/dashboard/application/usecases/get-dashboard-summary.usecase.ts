@@ -4,6 +4,10 @@ import {
   type FinancialAccountRepositoryPort,
 } from '../../../accounts/domain/ports/financial-account.repository.port.js';
 import {
+  financialInvestmentRepositoryPort,
+  type FinancialInvestmentRepositoryPort,
+} from '../../../accounts/domain/ports/financial-investment.repository.port.js';
+import {
   transactionRepositoryPort,
   type TransactionRepositoryPort,
 } from '../../../transactions/domain/ports/transaction.repository.port.js';
@@ -21,6 +25,8 @@ export class GetDashboardSummaryUsecase {
     private readonly transactionRepository: TransactionRepositoryPort,
     @Inject(financialAccountRepositoryPort)
     private readonly financialAccountRepository: FinancialAccountRepositoryPort,
+    @Inject(financialInvestmentRepositoryPort)
+    private readonly financialInvestmentRepository: FinancialInvestmentRepositoryPort,
   ) {}
 
   async execute(month?: string): Promise<DashboardSummary> {
@@ -90,15 +96,25 @@ export class GetDashboardSummaryUsecase {
       }),
     );
 
-    const investmentAccountSummaries: InvestmentAccountSummary[] =
-      investmentAccounts.map((account) => ({
+    const storedInvestments =
+      await this.financialInvestmentRepository.findAll();
+
+    const investmentAccountSummaries: InvestmentAccountSummary[] = [
+      ...investmentAccounts.map((account) => ({
         id: account.id,
         name: account.name,
         balance: account.balance,
         subtype: account.subtype,
-      }));
+      })),
+      ...storedInvestments.map((investment) => ({
+        id: investment.id,
+        name: investment.name,
+        balance: investment.balance,
+        subtype: investment.subtype ?? investment.type,
+      })),
+    ];
 
-    const investmentTotal = investmentAccounts.reduce(
+    const investmentTotal = investmentAccountSummaries.reduce(
       (total, account) => total + account.balance,
       0,
     );

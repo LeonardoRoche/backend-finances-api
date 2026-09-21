@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import type {
   PluggyAccount,
   PluggyApiGatewayPort,
+  PluggyInvestment,
   PluggyItem,
   PluggyTransaction,
 } from '../../modules/pluggy/domain/ports/pluggy-api.gateway.port.js';
@@ -46,6 +47,16 @@ export class PluggyApiGatewayAdapter implements PluggyApiGatewayPort {
 
   async fetchAccountsByItemId(itemId: string): Promise<PluggyAccount[]> {
     return this.fetchPagePaginated<PluggyAccount>(`/accounts?itemId=${itemId}`);
+  }
+
+  async fetchInvestmentsByItemId(itemId: string): Promise<PluggyInvestment[]> {
+    try {
+      return await this.fetchPagePaginated<PluggyInvestment>(
+        `/investments?itemId=${itemId}`,
+      );
+    } catch {
+      return [];
+    }
   }
 
   async fetchTransactionsByAccountId(

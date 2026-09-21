@@ -21,6 +21,16 @@ export type PluggyAccount = {
   } | null;
 };
 
+export type PluggyInvestment = {
+  id: string;
+  itemId: string;
+  name: string;
+  balance: number;
+  type: string;
+  subtype?: string | null;
+  status?: string | null;
+};
+
 export type PluggyTransaction = {
   id: string;
   description: string;
@@ -37,6 +47,7 @@ export interface PluggyApiGatewayPort {
   fetchAllItems(): Promise<PluggyItem[]>;
   fetchItem(itemId: string): Promise<PluggyItem>;
   fetchAccountsByItemId(itemId: string): Promise<PluggyAccount[]>;
+  fetchInvestmentsByItemId(itemId: string): Promise<PluggyInvestment[]>;
   fetchTransactionsByAccountId(accountId: string): Promise<PluggyTransaction[]>;
   fetchTransactionsFromLink(link: string): Promise<PluggyTransaction[]>;
 }

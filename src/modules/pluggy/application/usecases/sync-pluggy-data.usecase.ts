@@ -22,6 +22,10 @@ import {
   financialAccountRepositoryPort,
   type FinancialAccountRepositoryPort,
 } from '../../../accounts/domain/ports/financial-account.repository.port.js';
+import {
+  financialInvestmentRepositoryPort,
+  type FinancialInvestmentRepositoryPort,
+} from '../../../accounts/domain/ports/financial-investment.repository.port.js';
 import { toFinancialAccountEntity } from '../mappers/pluggy-account.mapper.js';
 import { TransactionCategorizationService } from '../services/transaction-categorization.service.js';
 import { isPluggyItemId } from '../utils/pluggy-id.util.js';
@@ -51,6 +55,8 @@ export class SyncPluggyDataUsecase {
     private readonly transactionCategorizationService: TransactionCategorizationService,
     @Inject(financialAccountRepositoryPort)
     private readonly financialAccountRepository: FinancialAccountRepositoryPort,
+    @Inject(financialInvestmentRepositoryPort)
+    private readonly financialInvestmentRepository: FinancialInvestmentRepositoryPort,
   ) {}
 
   async execute(itemIds?: string[]): Promise<SyncPluggyDataResult> {
@@ -93,10 +99,37 @@ export class SyncPluggyDataUsecase {
         item.id,
       );
 
+      const pluggyInvestments =
+        await this.pluggyApiGateway.fetchInvestmentsByItemId(item.id);
+
+      await this.financialInvestmentRepository.replaceForItem(
+        item.id,
+        pluggyInvestments
+          .filter(
+            (investment) =>
+              !investment.status ||
+              investment.status === 'ACTIVE' ||
+              investment.status === 'PENDING',
+          )
+          .map((investment) => ({
+            pluggyInvestmentId: investment.id,
+            pluggyItemId: item.id,
+            name: investment.name,
+            balance: investment.balance,
+            type: investment.type,
+            subtype: investment.subtype ?? null,
+            status: investment.status ?? 'ACTIVE',
+          })),
+      );
+
       for (const account of accounts) {
         await this.financialAccountRepository.upsertByPluggyAccountId(
           toFinancialAccountEntity(account, item.id),
         );
+
+        if (account.type === 'INVESTMENT') {
+          continue;
+        }
 
         const transactions =
           await this.pluggyApiGateway.fetchTransactionsByAccountId(account.id);
