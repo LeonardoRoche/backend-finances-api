@@ -21,7 +21,7 @@ export class FinancialAccountOrmEntity {
   name!: string;
 
   @Column({ type: 'varchar', length: 16 })
-  type!: 'BANK' | 'CREDIT';
+  type!: 'BANK' | 'CREDIT' | 'INVESTMENT';
 
   @Column({ type: 'varchar', length: 32 })
   subtype!: string;

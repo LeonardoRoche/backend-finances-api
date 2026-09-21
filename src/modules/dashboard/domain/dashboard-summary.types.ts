@@ -5,6 +5,13 @@ export type BankAccountSummary = {
   subtype: string;
 };
 
+export type InvestmentAccountSummary = {
+  id: string;
+  name: string;
+  balance: number;
+  subtype: string;
+};
+
 export type CreditCardSummary = {
   id: string;
   name: string;
@@ -19,6 +26,8 @@ export type CreditCardSummary = {
 export type DashboardSummary = {
   bankBalance: number;
   bankAccounts: BankAccountSummary[];
+  investmentTotal: number;
+  investmentAccounts: InvestmentAccountSummary[];
   monthlySalary: number;
   monthlyBalance: number;
   monthlyExpenses: number;

@@ -7,7 +7,7 @@ API REST de finanças pessoais construída com **NestJS 12** e **PostgreSQL**. I
 - **Conexões** — registrar contas conectadas via Pluggy
 - **Transações** — CRUD, filtros por tipo/categoria/mês e detecção de transferências
 - **Orçamentos** — limites por categoria com gasto calculado
-- **Dashboard** — saldo, gastos, PIX/TED e resumo de cartões
+- **Dashboard** — saldo, gastos, PIX/TED, investimentos e resumo de cartões
 - **Pluggy** — sync automático, webhook e recategorização (regras + IA opcional)
 
 ## Pré-requisitos

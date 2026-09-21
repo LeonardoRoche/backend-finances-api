@@ -10,7 +10,7 @@ export type PluggyAccount = {
   id: string;
   itemId: string;
   name: string;
-  type: 'BANK' | 'CREDIT';
+  type: 'BANK' | 'CREDIT' | 'INVESTMENT';
   subtype: string;
   balance: number;
   creditData?: {

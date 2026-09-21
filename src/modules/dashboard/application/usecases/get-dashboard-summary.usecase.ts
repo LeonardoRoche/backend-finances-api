@@ -11,6 +11,7 @@ import type {
   BankAccountSummary,
   CreditCardSummary,
   DashboardSummary,
+  InvestmentAccountSummary,
 } from '../../domain/dashboard-summary.types.js';
 
 @Injectable()
@@ -26,6 +27,9 @@ export class GetDashboardSummaryUsecase {
     const accounts = await this.financialAccountRepository.findAll();
     const bankAccounts = accounts.filter((account) => account.type === 'BANK');
     const creditAccounts = accounts.filter((account) => account.type === 'CREDIT');
+    const investmentAccounts = accounts.filter(
+      (account) => account.type === 'INVESTMENT',
+    );
 
     const bankBalance = bankAccounts.reduce(
       (total, account) => total + account.balance,
@@ -86,9 +90,24 @@ export class GetDashboardSummaryUsecase {
       }),
     );
 
+    const investmentAccountSummaries: InvestmentAccountSummary[] =
+      investmentAccounts.map((account) => ({
+        id: account.id,
+        name: account.name,
+        balance: account.balance,
+        subtype: account.subtype,
+      }));
+
+    const investmentTotal = investmentAccounts.reduce(
+      (total, account) => total + account.balance,
+      0,
+    );
+
     return {
       bankBalance,
       bankAccounts: bankAccountSummaries,
+      investmentTotal,
+      investmentAccounts: investmentAccountSummaries,
       monthlySalary,
       monthlyBalance,
       monthlyExpenses,
