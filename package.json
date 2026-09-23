@@ -19,8 +19,7 @@
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
-    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
-    "seed:demo": "docker cp scripts/seed-demo.sql payment_finance_postgres:/tmp/seed-demo.sql && docker exec payment_finance_postgres psql -U postgres -d payment_finance -f /tmp/seed-demo.sql"
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
