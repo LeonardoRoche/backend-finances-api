@@ -7,7 +7,6 @@ export type ListTransactionsFilters = {
   month?: string;
   page?: number;
   pageSize?: number;
-  /** @deprecated use pageSize */
   limit?: number;
 };
 
