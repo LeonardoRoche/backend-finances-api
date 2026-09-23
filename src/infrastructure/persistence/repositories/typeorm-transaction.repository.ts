@@ -5,9 +5,11 @@ import { TransactionOrmEntity } from '../entities/transaction.orm-entity.js';
 import { TransactionEntity } from '../../../modules/transactions/domain/entities/transaction.entity.js';
 import type {
   ListTransactionsFilters,
+  PaginatedTransactionsResult,
   TransactionMetrics,
   TransactionRepositoryPort,
 } from '../../../modules/transactions/domain/ports/transaction.repository.port.js';
+import type { SelectQueryBuilder } from 'typeorm';
 import {
   buildOutgoingTransferDescriptionMatch,
   buildTransferDescriptionExclusions,
@@ -82,9 +84,46 @@ export class TypeormTransactionRepository implements TransactionRepositoryPort {
     await this.repository.delete({ id });
   }
 
-  async findAll(filters: ListTransactionsFilters = {}): Promise<TransactionEntity[]> {
+  async findAll(): Promise<TransactionEntity[]> {
+    const rows = await this.repository.find({
+      order: { date: 'DESC', createdAt: 'DESC' },
+    });
+
+    return rows.map((row) => this.toDomain(row));
+  }
+
+  async findPaginated(
+    filters: ListTransactionsFilters = {},
+  ): Promise<PaginatedTransactionsResult> {
+    const page = filters.page ?? 1;
+    const pageSize = filters.pageSize ?? filters.limit ?? 10;
     const query = this.repository.createQueryBuilder('transaction');
 
+    this.applyListFilters(query, filters);
+
+    query.orderBy('transaction.date', 'DESC');
+    query.addOrderBy('transaction.created_at', 'DESC');
+
+    const total = await query.getCount();
+
+    const rows = await query
+      .skip((page - 1) * pageSize)
+      .take(pageSize)
+      .getMany();
+
+    return {
+      data: rows.map((row) => this.toDomain(row)),
+      total,
+      page,
+      pageSize,
+      totalPages: total > 0 ? Math.ceil(total / pageSize) : 0,
+    };
+  }
+
+  private applyListFilters(
+    query: SelectQueryBuilder<TransactionOrmEntity>,
+    filters: ListTransactionsFilters,
+  ): void {
     if (filters.search) {
       query.andWhere('transaction.description ILIKE :search', {
         search: `%${filters.search}%`,
@@ -129,15 +168,6 @@ export class TypeormTransactionRepository implements TransactionRepositoryPort {
         month: filters.month,
       });
     }
-
-    query.orderBy('transaction.date', 'DESC');
-
-    if (filters.limit) {
-      query.take(filters.limit);
-    }
-
-    const rows = await query.getMany();
-    return rows.map((row) => this.toDomain(row));
   }
 
   async getTransactionMetrics(month?: string): Promise<TransactionMetrics> {

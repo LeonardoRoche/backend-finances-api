@@ -5,7 +5,18 @@ export type ListTransactionsFilters = {
   type?: string;
   category?: string;
   month?: string;
+  page?: number;
+  pageSize?: number;
+  /** @deprecated use pageSize */
   limit?: number;
+};
+
+export type PaginatedTransactionsResult = {
+  data: TransactionEntity[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 };
 
 export type TransactionMetrics = {
@@ -28,7 +39,10 @@ export interface TransactionRepositoryPort {
   findById(id: string): Promise<TransactionEntity | null>;
   update(id: string, transaction: TransactionEntity): Promise<TransactionEntity>;
   delete(id: string): Promise<void>;
-  findAll(filters?: ListTransactionsFilters): Promise<TransactionEntity[]>;
+  findAll(): Promise<TransactionEntity[]>;
+  findPaginated(
+    filters?: ListTransactionsFilters,
+  ): Promise<PaginatedTransactionsResult>;
   getTransactionMetrics(month?: string): Promise<TransactionMetrics>;
   sumOutgoingTransfers(month?: string): Promise<number>;
   sumPeerOutgoingTransfers(month?: string): Promise<number>;

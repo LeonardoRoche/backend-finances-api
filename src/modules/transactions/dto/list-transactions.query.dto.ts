@@ -22,5 +22,17 @@ export class ListTransactionsQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  page?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  pageSize?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
   limit?: number;
 }
